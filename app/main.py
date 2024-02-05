@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from sqlmodel import SQLModel, create_engine, Session, select
-from models import User, ProjectPost
+from models import User, UserPost, ProjectPost, Project, UsersProjects, UserRole
 
 sqlite_file_name = "database.db"
 sqlite_url = f"sqlite:///{sqlite_file_name}"
@@ -32,7 +32,9 @@ async def get_user(user_id: int):
     return user
 
 @app.post("/users")
-async def create_user(user: User):
+async def create_user(user: UserPost):
+
+    user = User(login=user.login, password=user.password)    
     with Session(engine) as session:
         session.add(user)
         session.commit()
@@ -47,11 +49,12 @@ async def get_all_users():
 
 @app.post("/projects")
 async def create_project(project: ProjectPost):
-    print('===================================')
-    print(project)
 
-    # with Session(engine) as session:
-    #     session.add(project)
-    #     session.commit()
-    #     session.refresh(project)
-    #     return project
+    with Session(engine) as session: 
+        owner = session.get(User, project.owner_id)
+        new_project = Project(name=project.name, description=project.description)
+        owner_project = UsersProjects(users=owner, projects=new_project, user_role=UserRole.owner)
+        session.add(owner)
+        session.add(new_project)
+        session.add(owner_project)
+        session.commit()

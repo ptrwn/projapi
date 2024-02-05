@@ -26,8 +26,6 @@ class User(UserBase, table=True):
 class UserPost(UserBase): ...
 
 
-
-
 class ProjectBase(SQLModel):
     name: str =  Field(default=None, unique=True)
     description: Optional[str] =  Field(default=None, unique=True)
