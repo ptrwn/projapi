@@ -58,3 +58,16 @@ async def create_project(project: ProjectPost):
         session.add(new_project)
         session.add(owner_project)
         session.commit()
+
+        if project.guests:
+            guests = [session.get(User, guest) for guest in project.guests]
+            guests_project = [UsersProjects(users=guest, projects=new_project, user_role=UserRole.guest) for guest in guests]
+
+            for guest, guest_proj in zip(guests, guests_project):
+                session.add(guest)
+                session.add(guest_proj)
+
+            session.commit()
+            
+
+
