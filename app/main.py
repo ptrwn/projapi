@@ -33,7 +33,6 @@ async def get_user(user_id: int):
 
 @app.post("/users")
 async def create_user(user: UserPost):
-
     user = User(login=user.login, password=user.password)    
     with Session(engine) as session:
         session.add(user)
@@ -46,6 +45,7 @@ async def get_all_users():
     with Session(engine) as session:
         users = session.exec(select(User)).all()
         return users
+
 
 @app.post("/projects")
 async def create_project(project: ProjectPost):
@@ -66,8 +66,33 @@ async def create_project(project: ProjectPost):
             for guest, guest_proj in zip(guests, guests_project):
                 session.add(guest)
                 session.add(guest_proj)
-
             session.commit()
             
 
+@app.put("/project/{project_id}")
+async def update_project(project_id):
+    ...
 
+
+@app.get("/project/{project_id}")
+async def get_project(project_id):
+    ...
+
+
+@app.get("/projects/{user_id}")
+async def get_projects_for_user(user_id):
+
+    res = []
+
+    with Session(engine) as session:
+        user = session.get(User, user_id)
+        for proj_link in user.project_links:
+            role = proj_link.user_role.value
+            project = session.get(Project, proj_link.project_id)
+            res.append({'role': role, 'project_name': project.name, 'project_desription': project.description})
+        
+    
+    return res
+
+
+        
